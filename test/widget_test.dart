@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:rpl_keamanan/config/dependency_injector.dart';
 import 'package:rpl_keamanan/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() async {
+    // Muat .env sebelum test berjalan agar AppConfig tidak
+    // melempar NotInitializedError.
+    await dotenv.load(fileName: '.env');
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('HomeScreen menampilkan judul aplikasi', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      DependencyProvider(
+        injector: DependencyInjector.instance,
+        child: const MyApp(),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // AppBar harus menampilkan judul aplikasi.
+    expect(find.text('RPL & Keamanan'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('HomeScreen menampilkan menu navigasi', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      DependencyProvider(
+        injector: DependencyInjector.instance,
+        child: const MyApp(),
+      ),
+    );
+
+    // Empat menu navigasi harus muncul.
+    expect(find.text('Daftar Pengguna'), findsOneWidget);
+    expect(find.text('Daftar Post'), findsOneWidget);
+    expect(find.text('Form Registrasi'), findsOneWidget);
+    expect(find.text('Demo Validasi'), findsOneWidget);
   });
 }
